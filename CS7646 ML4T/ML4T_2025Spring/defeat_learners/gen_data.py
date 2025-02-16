@@ -43,18 +43,17 @@ def best_4_lin_reg(seed=1489683273):
     :type seed: int  		  	   		 	 	 			  		 			     			  	 
     :return: Returns data that performs significantly better with LinRegLearner than DTLearner.  		  	   		 	 	 			  		 			     			  	 
     :rtype: numpy.ndarray  		  	   		 	 	 			  		 			     			  	 
-    """  		  	   		 	 	 			  		 			     			  	 
-    np.random.seed(seed)  		  	   		 	 	 			  		 			     			  	 
-    x = np.zeros((100, 2))  		  	   		 	 	 			  		 			     			  	 
-    y = np.random.random(size=(100,)) * 200 - 100  		  	   		 	 	 			  		 			     			  	 
-    # Here's is an example of creating a Y from randomly generated  		  	   		 	 	 			  		 			     			  	 
-    # X with multiple columns  		  	   		 	 	 			  		 			     			  	 
-    # y = x[:,0] + np.sin(x[:,1]) + x[:,2]**2 + x[:,3]**3  		  	   		 	 	 			  		 			     			  	 
-    return x, y  		  	   		 	 	 			  		 			     			  	 
+    """
+    np.random.seed(seed)
+    # Generate a dataset with a linear relationship
+    x = np.random.rand(100, 5)  # 100 rows, 5 columns
+    y = np.dot(x, np.array([1.5, -2.0, 3.0, 0.5, -1.0])) + np.random.normal(0, 0.1, 100)
+
+    return x, y
+
   		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-def best_4_dt(seed=1489683273):  		  	   		 	 	 			  		 			     			  	 
-    """  		  	   		 	 	 			  		 			     			  	 
+def best_4_dt(seed=1489683273):
+    """
     Returns data that performs significantly better with DTLearner than LinRegLearner.  		  	   		 	 	 			  		 			     			  	 
     The data set should include from 2 to 10 columns in X, and one column in Y.  		  	   		 	 	 			  		 			     			  	 
     The data should contain from 10 (minimum) to 1000 (maximum) rows.  		  	   		 	 	 			  		 			     			  	 
@@ -63,20 +62,33 @@ def best_4_dt(seed=1489683273):
     :type seed: int  		  	   		 	 	 			  		 			     			  	 
     :return: Returns data that performs significantly better with DTLearner than LinRegLearner.  		  	   		 	 	 			  		 			     			  	 
     :rtype: numpy.ndarray  		  	   		 	 	 			  		 			     			  	 
-    """  		  	   		 	 	 			  		 			     			  	 
-    np.random.seed(seed)  		  	   		 	 	 			  		 			     			  	 
-    x = np.zeros((100, 2))  		  	   		 	 	 			  		 			     			  	 
-    y = np.random.random(size=(100,)) * 200 - 100  		  	   		 	 	 			  		 			     			  	 
-    return x, y  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-def author():  		  	   		 	 	 			  		 			     			  	 
-    """  		  	   		 	 	 			  		 			     			  	 
-    :return: The GT username of the student  		  	   		 	 	 			  		 			     			  	 
-    :rtype: str  		  	   		 	 	 			  		 			     			  	 
-    """  		  	   		 	 	 			  		 			     			  	 
-    return "snidadana3"  # Change this to your user ID  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
+    """    
+    np.random.seed(seed)
+    # # Generate a dataset with a non-linear relationship
+    x = np.random.random((100, 2))
+    y = []
+    for i in range(x.shape[0]):
+        a, b = x[i, 0], x[i, 1]
+        if a > 0.5 and b > 0.5:
+            y.append(150 * np.sin(a * np.pi) + 100 * np.cos(b * np.pi))
+        elif a > 0.5:
+            y.append(100 * np.sin(a * np.pi) - 50 * np.cos(b * np.pi))
+        elif b > 0.5:
+            y.append(50 * np.sin(a * np.pi) + 200 * np.cos(b * np.pi))
+        else:
+            y.append(-100 * np.sin(a * np.pi) - 150 * np.cos(b * np.pi))
+    Y = np.array(y)
+    
+    return x, Y
+
+
+def author():
+    """
+    :return: The GT username of the student
+    :rtype: str
+    """
+    return "snidadana3"  # Change this to your user ID
+
+			  		 			     			  	 
 if __name__ == "__main__":  		  	   		 	 	 			  		 			     			  	 
-    print("they call me Tim.")  		  	   		 	 	 			  		 			     			  	 
+    print("they call me Srinadh.")

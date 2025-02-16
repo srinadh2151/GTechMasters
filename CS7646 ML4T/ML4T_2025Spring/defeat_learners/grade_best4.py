@@ -48,7 +48,7 @@ from grading.grading import (
 )  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
 # These two lines will be commented out in the final grading script.  		  	   		 	 	 			  		 			     			  	 
-from LinRegLearner import LinRegLearner  		  	   		 	 	 			  		 			     			  	 
+from LinRegLearner import LinRegLearner
   		  	   		 	 	 			  		 			     			  	 
 seconds_per_test_case = 5  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 

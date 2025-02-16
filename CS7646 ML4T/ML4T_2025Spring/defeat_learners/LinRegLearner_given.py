@@ -1,7 +1,6 @@
 """"""  		  	   		 	 	 			  		 			     			  	 
 """  		  	   		 	 	 			  		 			     			  	 
 A simple wrapper for linear regression.  (c) 2015 Tucker Balch  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
 Copyright 2018, Georgia Institute of Technology (Georgia Tech)  		  	   		 	 	 			  		 			     			  	 
 Atlanta, Georgia 30332  		  	   		 	 	 			  		 			     			  	 
 All Rights Reserved  		  	   		 	 	 			  		 			     			  	 
@@ -31,9 +30,10 @@ class LinRegLearner(object):
     This is a Linear Regression Learner. It is implemented correctly.  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
     :param verbose: If “verbose” is True, your code can print out information for debugging.  		  	   		 	 	 			  		 			     			  	 
-        If verbose = False your code should not generate ANY output. When we test your code, verbose will be False.  		  	   		 	 	 			  		 			     			  	 
+        If verbose = False your code should not generate ANY output.  		  	   		 	 	 			  		 			     			  	 
     :type verbose: bool  		  	   		 	 	 			  		 			     			  	 
     """  		  	   		 	 	 			  		 			     			  	 
+  		  	   		 	 	 			  		 			     			  	 
     def __init__(self, verbose=False):  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
         Constructor method  		  	   		 	 	 			  		 			     			  	 

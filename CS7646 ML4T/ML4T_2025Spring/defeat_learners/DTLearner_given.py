@@ -1,7 +1,7 @@
 """"""  		  	   		 	 	 			  		 			     			  	 
 """  		  	   		 	 	 			  		 			     			  	 
 A simple wrapper for linear regression.  (c) 2015 Tucker Balch  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
+Note, this is NOT a correct DTLearner; Replace with your own implementation.  		  	   		 	 	 			  		 			     			  	 
 Copyright 2018, Georgia Institute of Technology (Georgia Tech)  		  	   		 	 	 			  		 			     			  	 
 Atlanta, Georgia 30332  		  	   		 	 	 			  		 			     			  	 
 All Rights Reserved  		  	   		 	 	 			  		 			     			  	 
@@ -21,23 +21,37 @@ students of CS 7646 is prohibited and subject to being investigated as a
 GT honor code violation.  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
 -----do not edit anything above this line---  		  	   		 	 	 			  		 			     			  	 
+  		  	   		 	 	 			  		 			     			  	 
+Student Name: Tucker Balch (replace with your name)  		  	   		 	 	 			  		 			     			  	 
+GT User ID: snidadana3 (replace with your User ID)  		  	   		 	 	 			  		 			     			  	 
+GT ID: 903966341 (replace with your GT ID)  		  	   		 	 	 			  		 			     			  	 
 """  		  	   		 	 	 			  		 			     			  	 
+  		  	   		 	 	 			  		 			     			  	 
+import warnings  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
 import numpy as np  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
-class LinRegLearner(object):  		  	   		 	 	 			  		 			     			  	 
+class DTLearner(object):  		  	   		 	 	 			  		 			     			  	 
     """  		  	   		 	 	 			  		 			     			  	 
-    This is a Linear Regression Learner. It is implemented correctly.  		  	   		 	 	 			  		 			     			  	 
+    This is a decision tree learner object that is implemented incorrectly. You should replace this DTLearner with  		  	   		 	 	 			  		 			     			  	 
+    your own correct DTLearner from Project 3.  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
+    :param leaf_size: The maximum number of samples to be aggregated at a leaf, defaults to 1.  		  	   		 	 	 			  		 			     			  	 
+    :type leaf_size: int  		  	   		 	 	 			  		 			     			  	 
     :param verbose: If “verbose” is True, your code can print out information for debugging.  		  	   		 	 	 			  		 			     			  	 
         If verbose = False your code should not generate ANY output. When we test your code, verbose will be False.  		  	   		 	 	 			  		 			     			  	 
     :type verbose: bool  		  	   		 	 	 			  		 			     			  	 
     """  		  	   		 	 	 			  		 			     			  	 
-    def __init__(self, verbose=False):  		  	   		 	 	 			  		 			     			  	 
+  		  	   		 	 	 			  		 			     			  	 
+    def __init__(self, leaf_size=1, verbose=False):  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
         Constructor method  		  	   		 	 	 			  		 			     			  	 
         """  		  	   		 	 	 			  		 			     			  	 
+        warnings.warn(  		  	   		 	 	 			  		 			     			  	 
+            "\n\n  WARNING! THIS IS NOT A CORRECT DTLearner IMPLEMENTATION!"  		  	   		 	 	 			  		 			     			  	 
+            " REPLACE WITH YOUR OWN CODE\n"  		  	   		 	 	 			  		 			     			  	 
+        )  		  	   		 	 	 			  		 			     			  	 
         pass  # move along, these aren't the drones you're looking for  		  	   		 	 	 			  		 			     			  	 
   		  	   		 	 	 			  		 			     			  	 
     def author(self):  		  	   		 	 	 			  		 			     			  	 
@@ -77,8 +91,8 @@ class LinRegLearner(object):
         """  		  	   		 	 	 			  		 			     			  	 
         return (self.model_coefs[:-1] * points).sum(axis=1) + self.model_coefs[  		  	   		 	 	 			  		 			     			  	 
             -1  		  	   		 	 	 			  		 			     			  	 
-        ]  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-  		  	   		 	 	 			  		 			     			  	 
-if __name__ == "__main__":  		  	   		 	 	 			  		 			     			  	 
-    print("the secret clue is 'zzyzx'")  		  	   		 	 	 			  		 			     			  	 
+        ]
+
+			  	 
+if __name__ == "__main__":
+    print("the secret clue is 'zzyzx'")
