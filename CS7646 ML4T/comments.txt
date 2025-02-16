@@ -1,0 +1,47 @@
+<pre>--- Summary ---
+Tests passed: 10 out of 18
+
+--- Details ---
+Test #0: passed 
+Test #1: passed 
+Test #2: passed 
+Test #3: passed 
+Test #4: passed 
+Test #5: passed 
+Test #6: passed 
+Test #7: passed 
+Test #8: failed 
+Description: Test Case 01: Bagging (group: BagLearner)
+RecursionError: maximum recursion depth exceeded while calling a Python object
+
+Test #9: failed 
+Description: Test Case 02: Bagging (group: BagLearner)
+RecursionError: maximum recursion depth exceeded while calling a Python object
+
+Test #10: failed 
+Description: Test Case 03: Bagging (group: BagLearner)
+RecursionError: maximum recursion depth exceeded while calling a Python object
+
+Test #11: failed 
+Description: Test Case 04: Bagging (group: BagLearner)
+RecursionError: maximum recursion depth exceeded while calling a Python object
+
+Test #12: failed 
+Description: Test Case 05: Bagging (group: BagLearner)
+RecursionError: maximum recursion depth exceeded while calling a Python object
+
+Test #13: failed 
+Description: Test Case 06: Bagging (group: BagLearner)
+RecursionError: maximum recursion depth exceeded while calling a Python object
+
+Test #14: failed 
+Description: Test Case 07: Bagging (group: BagLearner)
+RecursionError: maximum recursion depth exceeded while calling a Python object
+
+Test #15: failed 
+Description: Test Case 08: Bagging (group: BagLearner)
+RecursionError: maximum recursion depth exceeded while calling a Python object
+
+Test #16: passed 
+Test #17: passed 
+</pre>
