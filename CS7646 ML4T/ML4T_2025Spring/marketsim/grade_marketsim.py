@@ -43,7 +43,13 @@ from grading.grading import (
     time_limit,
 )
 from util import get_data, get_orders_data_file
+import marketsim
+from marketsim import compute_portvals
 
+# print('grade_marketsim Current Working Directory:', os.getcwd())
+
+# os.environ(["LEARNER_DATA_DIR"]) = './CS7646 ML4T/ML4T_2025Spring/learner/'
+os.environ["ORDERS_DATA_DIR"] = './CS7646 ML4T/ML4T_2025Spring/marketsim/orders'
 # Student code
 main_code = "marketsim"  # module name to import
 

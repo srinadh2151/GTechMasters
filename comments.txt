@@ -1,54 +1,18 @@
 <pre>--- Summary ---
-Tests passed: 1 out of 13
+Tests passed: 13 out of 13
 
 --- Details ---
-Test #0: failed 
-Test case description: Orders 1
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-01.csv'
-
-Test #1: failed 
-Test case description: Orders 2
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-02.csv'
-
-Test #2: failed 
-Test case description: Orders 3
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-03.csv'
-
-Test #3: failed 
-Test case description: Orders 4
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-04.csv'
-
-Test #4: failed 
-Test case description: Orders 5
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-05.csv'
-
-Test #5: failed 
-Test case description: Orders 6
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-06.csv'
-
-Test #6: failed 
-Test case description: Orders 7
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-07.csv'
-
-Test #7: failed 
-Test case description: Orders 8
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-08.csv'
-
-Test #8: failed 
-Test case description: Orders 9
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-09.csv'
-
-Test #9: failed 
-Test case description: Orders 11, commission
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-11.csv'
-
-Test #10: failed 
-Test case description: Orders 12, impact
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-12.csv'
-
-Test #11: failed 
-Test case description: Orders 10, impact and commission
-FileNotFoundError: [Errno 2] No such file or directory: 'orders/orders-10.csv'
-
+Test #0: passed 
+Test #1: passed 
+Test #2: passed 
+Test #3: passed 
+Test #4: passed 
+Test #5: passed 
+Test #6: passed 
+Test #7: passed 
+Test #8: passed 
+Test #9: passed 
+Test #10: passed 
+Test #11: passed 
 Test #12: passed 
 </pre>

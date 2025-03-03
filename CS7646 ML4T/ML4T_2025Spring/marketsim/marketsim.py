@@ -111,21 +111,20 @@ def compute_portvals(
 
     # Calculate holdings
     holdings = trades.cumsum()
-    # holdings.iloc[0, -1] += start_val  # Ensure initial cash is added to holdings
 
     # Calculate portfolio values
-    portvals = (holdings * prices).sum(axis=1).round(2)
+    portvals = (holdings * prices).sum(axis=1) #.round(2)
     
     portvals_df = pd.DataFrame(portvals, columns=['Portfolio Value'])
-    print('****portvals_df ---\n', portvals_df)
+    portvals_df['Portfolio Value'] = portvals_df['Portfolio Value'] + start_val
+    
+    # print('****portvals_df ---\n', portvals_df)
 
     return portvals_df
 
-    # return rv
-    # return portvals
 
 def author():
-    return 'snidadana3'  # replace with your Georgia Tech username
+    return 'snidadana3'
 
 def test_code():
     """
@@ -136,7 +135,7 @@ def test_code():
     # Define input parameters
     # print('current working directory:', os.getcwd(), '\n', os.listdir())
     of = "./orders/orders2.csv"
-    of = "./CS7646 ML4T/ML4T_2025Spring/marketsim/orders/orders-02.csv"
+    # of = "./CS7646 ML4T/ML4T_2025Spring/marketsim/orders/orders-02.csv"
     sv = 1000000
 
     # Process orders
