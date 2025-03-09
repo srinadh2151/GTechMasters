@@ -42,7 +42,7 @@ def compute_portvals(
     # orders_file="./marketsim/orders/orders.csv",
     start_val=1000000,
     commission=9.95,
-    impact=0.005
+    impact=0.005,
 ):
     """
     Computes the portfolio values.
