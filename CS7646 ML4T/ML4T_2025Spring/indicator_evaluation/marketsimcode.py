@@ -35,11 +35,11 @@ import pandas as pd
 # os.chdir('../../')
 # os.getcwd()
 from util import get_data, plot_data
-
+os.environ["ORDERS_DATA_DIR"] = './CS7646 ML4T/ML4T_2025Spring/marketsim/orders'
 
 def compute_portvals(
-    orders_file="./orders/orders.csv",
-    # orders_file="./marketsim/orders/orders.csv",
+    trades_df,
+    # symbols,
     start_val=1000000,
     commission=9.95,
     impact=0.005,
@@ -47,8 +47,8 @@ def compute_portvals(
     """
     Computes the portfolio values.
 
-    :param orders_file: Path of the order file or the file object
-    :type orders_file: str or file object
+    :param trades_df: DataFrame containing trade orders with columns ['Date', 'Symbol', 'Order', 'Shares']
+    :type trades_df: pandas.DataFrame
     :param start_val: The starting value of the portfolio
     :type start_val: int
     :param commission: The fixed amount in dollars charged for each transaction (both entry and exit)
@@ -58,29 +58,16 @@ def compute_portvals(
     :return: the result (portvals) as a single-column dataframe, containing the value of the portfolio for each trading day in the first column from start_date to end_date, inclusive.
     :rtype: pandas.DataFrame
     """
-    # this is the function the autograder will call to test your code
-    # NOTE: orders_file may be a string, or it may be a file object. Your
-    # code should work correctly with either input
-    # TODO: Your code here
-
-    # In the template, instead of computing the value of the portfolio, we just
-    # read in the value of IBM over 6 months
-    # start_date = dt.datetime(2008, 1, 1)
-    # end_date = dt.datetime(2008, 6, 1)
-    # portvals = get_data(["IBM"], pd.date_range(start_date, end_date))
-    # portvals = portvals[["IBM"]]  # remove SPY
-    # rv = pd.DataFrame(index=portvals.index, data=portvals.values)
-
-    # Read orders file
-    orders = pd.read_csv(orders_file, index_col='Date', parse_dates=True, na_values=['nan'])
-    orders.sort_index(inplace=True)
+    # Ensure the DataFrame is sorted by date
+    trades_df.sort_index(inplace=True)
 
     # Get the date range for the simulation
-    start_date = orders.index.min()
-    end_date = orders.index.max()
+    start_date = trades_df.index.min()
+    end_date = trades_df.index.max()
 
     # Get the list of symbols
-    symbols = orders['Symbol'].unique().tolist()
+    symbols = trades_df['Symbol'].unique().tolist()
+    # We changed the logic to get all symbols from input
 
     # Get stock data
     prices = get_data(symbols, pd.date_range(start_date, end_date))
@@ -91,9 +78,8 @@ def compute_portvals(
     holdings = pd.DataFrame(0, index=prices.index, columns=prices.columns)
     holdings.iloc[0, -1] = start_val  # Set initial cash
 
-
     # Process each order
-    for date, order in orders.iterrows():
+    for date, order in trades_df.iterrows():
         symbol = order['Symbol']
         shares = order['Shares']
         order_type = order['Order']
@@ -113,15 +99,12 @@ def compute_portvals(
     holdings = trades.cumsum()
 
     # Calculate portfolio values
-    portvals = (holdings * prices).sum(axis=1) #.round(2)
+    portvals = (holdings * prices).sum(axis=1)
     
     portvals_df = pd.DataFrame(portvals, columns=['Portfolio Value'])
     portvals_df['Portfolio Value'] = portvals_df['Portfolio Value'] + start_val
-    
-    # print('****portvals_df ---\n', portvals_df)
 
     return portvals_df
-
 
 def author():
     return 'snidadana3'
@@ -134,12 +117,15 @@ def test_code():
     # note that during autograding his function will not be called.
     # Define input parameters
     # print('current working directory:', os.getcwd(), '\n', os.listdir())
-    of = "./orders/orders2.csv"
-    # of = "./CS7646 ML4T/ML4T_2025Spring/marketsim/orders/orders-02.csv"
+    # of = "./orders/orders2.csv"
+    of = "./CS7646 ML4T/ML4T_2025Spring/marketsim/orders/orders-02.csv"
     sv = 1000000
+    
+    # Load the Data    
+    orders_df = pd.read_csv(of, index_col='Date', parse_dates=True, na_values=['nan'])
 
     # Process orders
-    portvals = compute_portvals(orders_file=of, start_val=sv)
+    portvals = compute_portvals(trades_df= orders_df, start_val= sv)
     if isinstance(portvals, pd.DataFrame):
         portvals = portvals[portvals.columns[0]]  # just get the first column
     else:

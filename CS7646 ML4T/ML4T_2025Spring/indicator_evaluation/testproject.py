@@ -2,100 +2,131 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 import os
-from util import get_data, plot_data
 import matplotlib.pyplot as plt
-#import marketsimcode as ms
+# from util import get_data
+import util as ut
+from indicators import bollinger_bands, simple_moving_average, relative_strength_index, momentum, commodity_channel_index
+from TheoreticallyOptimalStrategy import testPolicy
 import marketsimcode as mm
-from TheoreticallyOptimalStrategy import *
-from indicators import *
 
 def author():
-	return 'snidadana3'
+    return 'snidadana3'
 
-def testPolicy(symbol = ['JPM'], sd=dt.datetime(2010,1,1), ed=dt.datetime(2011,12,31), sv = 100000):
-    orders = []
-    lookback = 10
-    
-    holdings={sym:0 for sym in symbol}
-  
-    dates = pd.date_range(sd,ed)
-    prices_1 = get_data(['JPM'],dates)
-    price = prices_1['JPM']
-    #prices = prices/prices[0]
-    
-    
-    df_i = get_indicators(price)
-    
-    sma = df_i['SMA']    
-    
-    bbp = df_i['bb_value']
-    vol = df_i['volatility']
-    moment = df_i['momentum']
-    cci = df_i['CCI']    
-    
-    sym = 'JPM'
-    orders.append([sd,'JPM','HOLD',0])
-    for day in range(lookback+1,df_i.shape[0]):
-        
-            if (sma.ix[day]<0.5) and (bbp.ix[day]<0.9) and (moment.ix[day]<0):
-		
-                if holdings[sym]<1000:
-                    holdings[sym] += 1000
-                    orders.append([price.index[day].date(),sym,'BUY',1000])
-            
-            
-            elif (sma.ix[day]>2) and (bbp.ix[day]>1) and (moment.ix[day]<0):
-		
-                if holdings[sym]>0:
-                    holdings[sym] -= 2000
-                    orders.append([price.index[day].date(),sym,'SELL',2000])
-                    
-            elif (holdings[sym]<=0) and (holdings[sym] >= -1000):
-                holdings[sym] -= 1000
-                orders.append([price.index[day].date(),sym,'SELL',1000])
-                
-            elif (sma.ix[day]>1) and (sma.ix[day-1]<1) and (holdings[sym]>0):
-                holdings[sym]=0
-                orders.append([price.index[day].date(),sym,'SELL',1000])
-            
-            elif (sma.ix[day]<=1) and (sma.ix[day-1]>1) and (holdings[sym]<0):
-                holdings[sym]=0
-                orders.append([price.index[day].date(),sym,'BUY',1000])
-        
-    orders.append([ed,sym,'HOLD',0])
-    
-    res=pd.DataFrame(orders)
-    res.columns=['Date','Symbol','Order','Shares']    
-    
-    #print res
-    p = mm.compute_portvals(res)
-    my_colors = ['black', 'blue']
-    start_val = 100000
-    ben = benchmark_trades('JPM')
-    p3 = mm.compute_portvals(ben,start_val)
-    
-    plt.figure(figsize=(20,10))
-    plt.gca().set_color_cycle(['black','blue'])
-    plt.legend(loc="upper left")
-    p = p/p[0]
-    p3 = p3/p3[0]
-    pp, = plt.plot(p)
-    pb, = plt.plot(p3)
-    plt.legend([pp,pb],['Manual','Benchmark'])
+def get_indicators(prices):
+    """Calculate and return all indicators as a DataFrame."""
+    indicators = {} #pd.DataFrame(index=prices.index)
+    indicators['SMA'] = simple_moving_average(prices)
+    indicators['bb_value'] = bollinger_bands(prices)
+    indicators['RSI'] = relative_strength_index(prices)
+    indicators['momentum'] = momentum(prices)
+    indicators['CCI'] = commodity_channel_index(prices)
+    return indicators
 
-    plt.xlabel('Dates')
-    plt.ylabel('Prices(normalized)')
-        
-    plt.show()    
-    
-    #print port
-    return 1
+def save_plot(fig, title):
+    """Save the plot to the images directory."""
+    if not os.path.exists('images'):
+        os.makedirs('images')
+    fig.savefig(f'./images/{title}.png')
+    print(f'Plot saved to images/{title}.png')
 
+def run_test_policy():
+    """Run the test policy and plot results."""
+    symbol = 'JPM'
+    sd = dt.datetime(2010, 1, 1)
+    ed = dt.datetime(2011, 12, 31)
+    sv = 100000
+
+    # Run the theoretically optimal strategy
+    orders = testPolicy(symbol=[symbol], sd=sd, ed=ed, sv=sv)
+    # print('Orders:', orders)
+
+    # Compute portfolio values
+    portvals = mm.compute_portvals(orders, start_val=sv) # symbols=[symbol],
+
+    # Normalize portfolio values
+    portvals = portvals / portvals.iloc[0]
+
+    # Plot portfolio values
+    plt.figure(figsize=(10, 6))
+    plt.plot(portvals, label='Portfolio Value')
+    plt.title('Portfolio Value Over Time')
+    plt.xlabel('Date')
+    plt.ylabel('Normalized Value')
+    plt.legend()
+    plt.show()
+    print('Portfolio Value Plot:')
 
 def main():
-    testPolicy()
-        
-    pass
+    # Define date range
+    sd = dt.datetime(2010, 1, 1)
+    ed = dt.datetime(2011, 12, 31)
+    symbol = 'JPM'
 
+    # Get stock data
+    dates = pd.date_range(sd, ed)
+    prices_all = ut.get_data([symbol], dates)    
+    prices = prices_all[symbol]
+    print('Prices Started:')
 
-if __name__ == "__main__": main()
+    # Calculate indicators
+    indicators = get_indicators(prices)
+
+    # Plot indicators
+
+    # Plot indicators
+    fig, axs = plt.subplots(3, 2, figsize=(14, 10))
+    # plt.figure(figsize=(14, 10))
+
+    # Bollinger Bands
+    ax = axs[0, 0]
+    bb_df = indicators['bb_value']
+    ax.plot(prices.index, prices, label='Price')
+    ax.plot(prices.index, bb_df['rolling mean'], label='Rolling Mean', linestyle='-')
+    ax.plot(prices.index, bb_df['upper band'], label='Upper Band', linestyle='-')
+    ax.plot(prices.index, bb_df['lower band'], label='Lower Band', linestyle='-')
+    ax.plot(prices.index, bb_df['bb value'], label='BB Value', linestyle=':')
+    ax.set_title('Bollinger Bands')
+    ax.legend()
+
+    # Simple Moving Average
+    ax = axs[0, 1]
+    sma_df = simple_moving_average(prices)
+    ax.plot(prices.index, prices, label='Price')
+    ax.plot(prices.index, sma_df['simple moving average'], label='SMA', linestyle='-')
+    ax.set_title('Simple Moving Average')
+    ax.legend()
+
+    # Relative Strength Index
+    ax = axs[1, 0]
+    ax.plot(prices.index, prices, label='Price', linestyle='-', alpha=0.5)
+    ax.plot(prices.index, relative_strength_index(prices), label='RSI')
+    ax.set_title('Relative Strength Index')
+    ax.legend()
+
+    # Momentum
+    ax1 = axs[1, 1]
+    ax2 = ax1.twinx()
+    ax1.plot(prices.index, prices, label='Price', linestyle='-', alpha=0.5, color='b')
+    ax2.plot(prices.index, momentum(prices), label='Momentum', color='r')
+    ax1.set_title('Momentum')
+    ax1.set_ylabel('Price', color='b')
+    ax2.set_ylabel('Momentum', color='r')
+    ax1.legend(loc='upper left')
+    ax2.legend(loc='upper right')
+
+    # Commodity Channel Index
+    ax = axs[2, 0]
+    cci_df = commodity_channel_index(prices)
+    ax.plot(prices.index, cci_df['Commodity Channel Index'], label='CCI')
+    ax.plot(prices.index, cci_df['Normalized Price'], label='Normalized Price', linestyle='-')
+    ax.set_title('Commodity Channel Index')
+    ax.legend()
+
+    plt.tight_layout()
+    save_plot(fig, f'Indicators_{symbol}')
+
+    # Run the test policy
+    run_test_policy()
+
+if __name__ == "__main__":
+    main()

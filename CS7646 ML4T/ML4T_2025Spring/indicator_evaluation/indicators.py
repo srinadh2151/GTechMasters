@@ -1,82 +1,156 @@
+"""
+CS7646 ML For Trading
+Project 6: Indicator Evaluation
+Indicators library
+Srinadh Nidadana (snidadana3)
+
+This file provides technical indicators for use in the Manual Strategy function.
+"""
+
 import pandas as pd
 import numpy as np
 import datetime as dt
-import util as ut
 import matplotlib.pyplot as plt
+import util as ut
 
-def get_indicators(df_prices, sym):
-    prices=df_prices[sym]
-    prices=prices/prices[0]
+def bollinger_bands(prices, window=10):
 
+    """Calculate Bollinger Bands."""
+    rm = prices.rolling(window=window, center=False).mean()
+    sd = prices.rolling(window=window, center=False).std()
+    upband = rm + (2 * sd)
+    dnband = rm - (2 * sd)
+    
+    # Create a DataFrame to store the indicators
     df_indicators = pd.DataFrame(index=prices.index)
-
-    #1 SMA
-    df_indicators['price'] = prices
-    df_indicators['rolling mean'] = prices.rolling(window=10,center=False).mean()
-
-    #2 Bollinger Bands
-    rm = prices.rolling(window=10,center=False).mean()
-    sd = prices.rolling(window=10,center=False).std()
-    upband = rm + (2*sd)
-    dnband = rm - (2*sd)    
+    df_indicators['rolling mean'] = rm
     df_indicators['upper band'] = upband
     df_indicators['lower band'] = dnband
-
-    #BB value
-    bb_value = (prices - rm)/(25 * sd)
+    
+    # Calculate BB value
+    bb_value = (prices - rm) / (2 * sd)
     df_indicators['bb value'] = bb_value
+    
+    return df_indicators
 
-    #3 Commodity Channel Index
-    cci = (prices-rm)/(2.5 * prices.std())
+def simple_moving_average(prices, window=20):
+    """Calculate Simple Moving Average."""
+    sma = prices.rolling(window=window).mean()
+
+    df_indicators = pd.DataFrame(index=prices.index)
+    df_indicators['simple moving average'] = sma
+    # df_indicators['price_sma_ratio'] = prices / sma
+    
+    return df_indicators 
+
+def relative_strength_index(prices, window=14):
+    """Calculate Relative Strength Index."""
+    delta = prices.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+def momentum(prices, window=10):
+    """Calculate Momentum."""
+    momentum = (prices / prices.shift(window)) - 1
+    return momentum
+
+def commodity_channel_index(prices, window=20):
+    
+    """Calculate Commodity Channel Index."""
+    rm = prices.rolling(window=window).mean()
+    normalized_prices = (prices - prices.min()) / (prices.max() - prices.min())
+
+    cci = (prices - rm) / (2.5 * prices.rolling(window=window).std())
+    
+    df_indicators = pd.DataFrame(index=prices.index)
     df_indicators['Commodity Channel Index'] = cci
+    df_indicators['Normalized Price'] = normalized_prices
 
-    # #4 Volatility
-    # volatility = prices.rolling(window=7,center=False).std()
-    # df_indicators['Volatility'] = volatility*3.5
-
-    #4 Relative Strength Index
-    rsi = 100 - (100 / (1 + cci.ewm(span=14, adjust=False).mean()))
-    df_indicators['Relative Strength Index'] = rsi
-
-    #5 Momentum  # or Rate of Change (only one of these two can be used).
-    momentum = prices - prices.shift(10)  # window size is 10
-    df_indicators['Momentum'] = momentum
-
-    return df_indicators.dropna()
+    return df_indicators
 
 def author():
     return 'snidadana3'
 
 def test_code():
-    dev_sd=dt.datetime(2008,1,1)
-    dev_ed=dt.datetime(2009,12,31)
-    test_sd=dt.datetime(2010,1,1)
-    test_ed=dt.datetime(2011,12,31)
+    # Define date range
+    dev_sd = dt.datetime(2008, 1, 1)
+    dev_ed = dt.datetime(2009, 12, 31)
+    symbol = 'JPM'
     
-    symbol='JPM'
-    
+    # Get stock data
     dates = pd.date_range(dev_sd, dev_ed)
     prices_all = ut.get_data([symbol], dates)
+    prices = prices_all[symbol]
     
-    #SMA
-    get_indicators(prices_all, symbol)[['price', 'rolling mean']].plot(figsize=(20, 7))
-    plt.show()
+    # Plot indicators
+    plt.figure(figsize=(14, 10))
     
-    #Bollinger
-    get_indicators(prices_all, symbol)[['upper band', 'lower band', 'bb value', 'rolling mean']].plot(figsize=(20, 7))
-    plt.show()
+    # Bollinger Bands
+    plt.subplot(3, 2, 1)
+    bb_df = bollinger_bands(prices)
+    plt.plot(prices.index, prices, label='Price')
+    plt.plot(prices.index, bb_df['rolling mean'], label='Rolling Mean', linestyle='-')
+    plt.plot(prices.index, bb_df['upper band'], label='Upper Band', linestyle='-')
+    plt.plot(prices.index, bb_df['lower band'], label='Lower Band', linestyle='-')
+    plt.plot(prices.index, bb_df['bb value'], label='BB Value', linestyle=':')
     
-    #CCI
-    get_indicators(prices_all, symbol)[['Commodity Channel Index']].plot(figsize=(20, 7))
-    plt.show()
+    plt.title('Bollinger Bands')
+    plt.legend()
     
-    #Volatility
-    get_indicators(prices_all, symbol)[['Volatility']].plot(figsize=(20, 7))
-    plt.show()
+    # Simple Moving Average
+    plt.subplot(3, 2, 2)
+    sma_df = simple_moving_average(prices)
+    plt.plot(prices.index, prices, label='Price')
+    plt.plot(prices.index, sma_df['simple moving average'], label='SMA', linestyle='-')
+    # plt.plot(prices.index, sma_df['price_sma_ratio'], label='Price/SMA Ratio', linestyle=':')
+    plt.title('Simple Moving Average')
+    plt.legend()
+    
+    # Relative Strength Index
+    # plt.subplot(3, 2, 3)
+    # plt.plot(prices.index, relative_strength_index(prices), label='RSI')
+    # plt.title('Relative Strength Index')
+    # plt.legend()
+    plt.subplot(3, 2, 3)
+    plt.plot(prices.index, prices, label='Price', linestyle='-', alpha=0.5)
+    plt.plot(prices.index, relative_strength_index(prices), label='RSI')
+    plt.title('Relative Strength Index')
+    plt.legend()
+    
+    # # Momentum
+    # plt.subplot(3, 2, 4)
+    # plt.plot(prices.index, prices, label='Price', linestyle='-', alpha=0.5)
+    # plt.plot(prices.index, momentum(prices), label='Momentum')
+    # plt.title('Momentum')
+    # plt.legend()
 
-    plt.axhline(y=0, linestyle=':')
-    plt.axhline(y=0.04, linestyle='--')
-    plt.axhline(y=-0.04, linestyle='--')
+    # Momentum
+    plt.subplot(3, 2, 4)
+    ax1 = plt.gca()
+    ax2 = ax1.twinx()
+    
+    ax1.plot(prices.index, prices, label='Price', linestyle='-', alpha=0.5, color='b')
+    ax2.plot(prices.index, momentum(prices), label='Momentum', color='r')
+
+    ax1.set_title('Momentum')
+    ax1.set_ylabel('Price', color='b')
+    ax2.set_ylabel('Momentum', color='r')
+    ax1.legend(loc='upper left')
+    ax2.legend(loc='upper right')
+    
+    # Commodity Channel Index
+    plt.subplot(3, 2, 5)
+    cci_df = commodity_channel_index(prices)
+    plt.plot(prices.index, cci_df['Commodity Channel Index'], label='CCI')
+    plt.plot(prices.index, cci_df['Normalized Price'], label='Normalized Price', linestyle='-')
+    plt.title('Commodity Channel Index')
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     test_code()
