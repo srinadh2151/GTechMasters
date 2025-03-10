@@ -37,7 +37,7 @@ def run_test_policy():
     sv = 100000
 
     # Run the theoretically optimal strategy
-    orders = testPolicy(symbol=[symbol], sd=sd, ed=ed, sv=sv)
+    orders = testPolicy(symbol=symbol, sd=sd, ed=ed, sv=sv)
     # print('Orders:', orders)
 
     # Compute portfolio values
@@ -54,7 +54,8 @@ def run_test_policy():
     plt.ylabel('Normalized Value')
     plt.legend()
     plt.show()
-    print('Portfolio Value Plot:')
+    save_plot(plt, 'Portfolio Value Over Time')
+    print('Portfolio Value Plot Saved')
 
 def main():
     # Define date range
