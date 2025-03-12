@@ -46,6 +46,7 @@ def testPolicy(symbol="AAPL", sd=dt.datetime(2010, 1, 1), ed=dt.datetime(2011, 1
         orders = orders[orders['Order'] != 'HOLD']
         
         print('Orders dataframe:\n', orders)
+        orders.to_csv('Optimal_Order_book.csv', index=False)
 
         return orders
 

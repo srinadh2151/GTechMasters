@@ -117,8 +117,8 @@ def test_code():
     # note that during autograding his function will not be called.
     # Define input parameters
     # print('current working directory:', os.getcwd(), '\n', os.listdir())
-    # of = "./orders/orders2.csv"
-    of = "./CS7646 ML4T/ML4T_2025Spring/marketsim/orders/orders-02.csv"
+    of = "./orders/orders2.csv"
+    # of = "./CS7646 ML4T/ML4T_2025Spring/marketsim/orders/orders-02.csv"
     sv = 1000000
     
     # Load the Data    
