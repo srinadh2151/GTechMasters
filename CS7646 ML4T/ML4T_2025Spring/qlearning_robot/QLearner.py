@@ -57,25 +57,26 @@ class QLearner(object):
         self,
         num_states=100,
         num_actions=4,
-        alpha=0.3, # Adjusted to converge
+        alpha=0.2, 
         gamma=0.9,
         rar=0.5, # Adjusted
         radr=0.99,
-        dyna=200, # Use Dyna-Q with more updates
+        dyna=0,
         verbose=False,
     ):
         """
         Constructor method
         """
-        self.verbose = verbose
-        self.num_actions = num_actions
         self.num_states = num_states
+        self.num_actions = num_actions
         self.alpha = alpha
         self.gamma = gamma
         self.rar = rar
         self.radr = radr
         self.dyna = dyna
+        self.verbose = verbose
         self.Q = np.zeros((num_states, num_actions))
+        self.Dyna_T= np.zeros((0, 4), dtype=int)
         self.s = 0
         self.a = 0
         self.experience = []
@@ -96,13 +97,21 @@ class QLearner(object):
         #     print(f"s = {s}, a = {action}")
         # return action
         self.s = s
+        
+        # Decision to explore or exploit
         if rand.random() < self.rar:
+            # action
             action = rand.randint(0, self.num_actions - 1)
         else:
             action = np.argmax(self.Q[s, :])
+
+        # Update the action and decay the random action rate
+        self.rar *=self.radr
         self.a = action
-        return action
         
+        if self.verbose:
+            print(f"querysetstate: s={s}, action={action}")
+        return action        
 
     def query(self, s_prime, r):
         """
@@ -115,35 +124,37 @@ class QLearner(object):
         :return: The selected action
         :rtype: int
         """
-        # action = rand.randint(0, self.num_actions - 1)
-        # if self.verbose:
-        #     print(f"s = {s_prime}, a = {action}, r={r}")
-        # return action
-        
-        # Update Q-table
-        self.Q[self.s, self.a] = (1 - self.alpha) * self.Q[self.s, self.a] + \
-                                 self.alpha * (r + self.gamma * np.max(self.Q[s_prime, :]))
+        # Update the Q-value for the current state-action pair
+        current_q_value = self.Q[self.s, self.a]
+        max_future_q = np.max(self.Q[s_prime, :])
+        updated_q_value = (1 - self.alpha) * current_q_value + self.alpha * (r + self.gamma * max_future_q)
+        self.Q[self.s, self.a] = updated_q_value
 
-        # Dyna-Q updates
+        # Store the experience for Dyna-Q updates
         if self.dyna > 0:
             self.experience.append((self.s, self.a, s_prime, r))
             for _ in range(self.dyna):
-                s, a, s_prime, r = rand.choice(self.experience)
-                self.Q[s, a] = (1 - self.alpha) * self.Q[s, a] + \
-                               self.alpha * (r + self.gamma * np.max(self.Q[s_prime, :]))
-                               
-        # Update state and action
-        self.s = s_prime
-        if rand.random() < self.rar:
-            action = rand.randint(0, self.num_actions - 1)
-        else:
-            action = np.argmax(self.Q[s_prime, :])
-        self.a = action
+                # Randomly sample from past experiences
+                s, a, s_next, reward = rand.choice(self.experience)
+                simulated_q_value = self.Q[s, a]
+                max_simulated_future_q = np.max(self.Q[s_next, :])
+                self.Q[s, a] = (1 - self.alpha) * simulated_q_value + self.alpha * (reward + self.gamma * max_simulated_future_q)
 
-        # Decay random action rate
+        # Decide the next action
+        if rand.random() < self.rar:
+            next_action = rand.randint(0, self.num_actions - 1)
+        else:
+            next_action = np.argmax(self.Q[s_prime, :])
+
+        # Update the state and action, and decay the random action rate
+        self.s = s_prime
+        self.a = next_action
         self.rar *= self.radr
 
-        return action
+        if self.verbose:
+            print(f"query: s_prime={s_prime}, r={r}, action={next_action}")
+
+        return next_action
 
     def author(self):
         return 'snidadana3'  # GT username
