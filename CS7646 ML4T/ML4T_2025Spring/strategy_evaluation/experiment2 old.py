@@ -28,16 +28,12 @@ GT ID: 903966341 (replace with your GT ID)
 """
 
 import datetime as dt
+import json
 import logging
 import numpy as np
 import pandas as pd
 import random
-import matplotlib.pyplot as plt
-import os
-
-# print('Current Working Dir:', os.getcwd())  # Change the current working directory to the project root
-# os.chdir('./CS7646 ML4T/ML4T_2025Spring/strategy_evaluation')  # Change to the correct directory
-print('Current Working Dir:', os.getcwd())  # Change the current working directory to the project root
+import sys
 
 from marketsimcode import compute_portvals
 from StrategyLearner import StrategyLearner
@@ -47,8 +43,11 @@ log = logging.getLogger(__name__)
 
 def main():
     """
-    Conduct an experiment with StrategyLearner to show how changing the value of impact
-    affects in-sample trading behavior. Use two metrics: number of trades and cumulative return.
+    Provide an hypothesis regarding how changing the value of impact
+    should affect in sample trading behavior and results (provide at
+    least two metrics). Conduct an experiment with JPM on the
+    in sample period to test that hypothesis. Provide charts, graphs
+    or tables that illustrate the results of your experiment.
     """
 
     # Hypothesis:
@@ -60,20 +59,20 @@ def main():
     # after accounting for the impact cost.
 
     # Set the seed for reproducibility
-    random.seed(7181090000)
+    random.seed(5210780000)
 
     # Experiment parameters
     symbol = 'JPM'
+    # In-sample: January 1, 2008 to December 31 2009
     start_date = dt.datetime(2008, 1, 1)
     end_date = dt.datetime(2009, 12, 31)
     starting_value = 100000
     commission = 0.0
-    impact_values = [0.0, 0.005, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]  # Impact values to test
+    # Values to use to evaluate the effect of the impact
+    impact_values = [0.0, 0.005, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0]
 
-    # Lists to store results
-    all_trades_count = []
-    all_cumulative_returns = []
     all_entries = []
+    all_returns = []
     all_episodes = []
 
     for impact in impact_values:
@@ -96,12 +95,10 @@ def main():
             sv=starting_value
         )
 
-        # Count the number of trades
-        num_trades = trades[trades != 0].count()
-        all_trades_count.append(num_trades)
-
-        # Compute portfolio values
+        log.info("Converting StrategyLearner trades to marketsim orders")
         orders = _convert_trades_to_marketisim_orders(symbol, trades)
+
+        log.info("Computing portfolio values for %d orders", orders.shape[0])
         port_vals = compute_portvals(
             orders,
             start_val=starting_value,
@@ -109,80 +106,21 @@ def main():
             impact=impact
         )
 
-        # Calculate cumulative return
         cumulative_return = _compute_cumulative_return(port_vals)
-        all_cumulative_returns.append(cumulative_return)
 
-        # Collect additional metrics
         all_entries.append(strategy_learner.metadata['entries'])
+        all_returns.append(cumulative_return)
         all_episodes.append(strategy_learner.metadata['training_episodes'])
 
-    # Plot and save results
-    _plot_and_save_results(impact_values, all_trades_count, all_cumulative_returns)
     _plot_and_save_number_of_entries_per_impact_value(impact_values, all_entries)
     _plot_and_save_number_of_episodes_per_impact_value(impact_values, all_episodes)
-    _plot_and_save_cumulative_return_per_impact_value(impact_values, all_cumulative_returns)
+    _plot_and_save_cumulative_return_per_impact_value(impact_values, all_returns)
 
 def author():
     """
     Returns the author's GT username.
     """
     return 'snidadana3'
-
-def _convert_trades_to_marketisim_orders(symbol, trades):
-    """
-    Convert trades DataFrame to the format expected by marketsimcode.py.
-    """
-    # Ensure the DataFrame has the correct columns
-    orders = pd.DataFrame(index=trades.index, columns=['Order', 'Date', 'Symbol', 'Shares'])
-
-    for index, trade in trades.iterrows():
-        shares = trade['Shares']
-        if shares == 0:
-            orders.loc[index] = ['HOLD', index, symbol, shares]
-        elif shares > 0:
-            orders.loc[index] = ['BUY', index, symbol, shares]
-        else:
-            orders.loc[index] = ['SELL', index, symbol, -shares]  # Corrected to match the expected shape
-
-    return orders
-
-def _compute_cumulative_return(portfolio_values):
-    """
-    Compute the cumulative return of the portfolio.
-    """
-    return (portfolio_values.iloc[-1] / portfolio_values.iloc[0]) - 1
-
-def _plot_and_save_results(impact_values, trades_count, cumulative_returns):
-    """
-    Plot and save the number of trades and cumulative returns for different impact values.
-    """
-    fig, ax1 = plt.subplots(figsize=(10, 6))
-
-    # Plot number of trades
-    ax1.set_xlabel('Impact Value')
-    ax1.set_ylabel('Number of Trades', color='tab:blue')
-    ax1.plot(impact_values, trades_count, 'o-', color='tab:blue', label='Number of Trades')
-    ax1.tick_params(axis='y', labelcolor='tab:blue')
-
-    # Plot cumulative returns
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Cumulative Return', color='tab:red')
-    ax2.plot(impact_values, cumulative_returns, 's-', color='tab:red', label='Cumulative Return')
-    ax2.tick_params(axis='y', labelcolor='tab:red')
-
-    # Title and layout
-    plt.title('Impact of Market Impact on Trading Behavior')
-    fig.tight_layout()
-
-    # Save the plot
-    plt.savefig('./images/impact_on_trading_behavior.png')
-    plt.show()
-
-    # Explanation of results
-    log.info("The plot shows how the number of trades and cumulative returns change with different impact values.")
-    log.info("As the impact value increases, the number of trades generally decreases, indicating a more conservative strategy.")
-    log.info("Similarly, the cumulative return tends to decrease with higher impact values, reflecting the cost of trading.")
 
 def _plot_and_save_number_of_entries_per_impact_value(impact_values, entries):
     _generate_bar_plot(
@@ -195,6 +133,8 @@ def _plot_and_save_number_of_entries_per_impact_value(impact_values, entries):
         'Experiment2-NumberOfEntries'
     )
 
+    _save_as_json(impact_values, entries, 'entries_per_impact')
+
 def _plot_and_save_number_of_episodes_per_impact_value(impact_values, episodes):
     _generate_bar_plot(
         episodes,
@@ -205,6 +145,8 @@ def _plot_and_save_number_of_episodes_per_impact_value(impact_values, episodes):
         impact_values,
         'Experiment2-NumberOfEpisodes'
     )
+
+    _save_as_json(impact_values, episodes, 'episodes_per_impact')
 
 def _plot_and_save_cumulative_return_per_impact_value(impact_values, returns):
     _generate_bar_plot(
@@ -217,8 +159,33 @@ def _plot_and_save_cumulative_return_per_impact_value(impact_values, returns):
         'Experiment2-CumulativeReturn'
     )
 
+    _save_as_json(impact_values, returns, 'cumulative_return_per_impact')
+
+def _convert_trades_to_marketisim_orders(symbol, trades):
+    # Convert the trades into the format expected by my marketsimcode.py
+    orders = pd.DataFrame(index=trades.index, columns=['Order', 'Date', 'Symbol', 'Shares'])
+
+    for index, trade in trades.iterrows():
+        shares = trade['Shares']
+
+        if shares == 0:
+            orders.loc[index] = ['HOLD', index, symbol, shares]
+        elif shares > 0:
+            orders.loc[index] = ['BUY', index, symbol, shares]
+        else:
+            orders.loc[index] = ['SELL', index, symbol, shares * -1]
+
+    return orders
+
+def _compute_cumulative_return(portfolio_values):
+    return (portfolio_values[-1] / portfolio_values[0]) - 1
+
 def _generate_bar_plot(data, title, xlabel, ylabel, bar_label, groups, filename):
+    # See: https://matplotlib.org/examples/pylab_examples/barchart_demo.html
     log.info("Generating bar plot with title '%s'", title)
+
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
 
     plt.close()
 
@@ -235,17 +202,47 @@ def _generate_bar_plot(data, title, xlabel, ylabel, bar_label, groups, filename)
     plt.ylabel(ylabel, fontsize='15')
     plt.title(title)
 
+    # Rotate tick labels and align them
+    # See: https://stackoverflow.com/questions/14852821/aligning-rotated-xticklabels-with-their-respective-xticks
+    # See: https://matplotlib.org/examples/ticks_and_spines/ticklabels_demo_rotation.html
     plt.xticks(index + bar_width / 2, groups, rotation=45, ha='right')
 
     plt.legend()
     plt.tight_layout()
 
-    # save_folder = './images'
-    # print('save_folder:', os.getcwd())
+    # save_folder = './CS7646 ML4T/ML4T_2025Spring/strategy_evaluation/images'
     save_folder = './'
+    
     plt.savefig(f"{save_folder}/{filename}.png", bbox_inches='tight')
 
     log.info("Saved bar plot to file: %s", filename)
 
+def _save_as_json(impact_values, metrics, filename):
+    log.info("Creating JSON data")
+
+    data = {}
+    for index, impact in enumerate(impact_values):
+        data[impact] = metrics[index]
+
+    # save_folder = './CS7646 ML4T/ML4T_2025Spring/strategy_evaluation/images'
+    save_folder = './'
+    
+    filepath = f"{save_folder}/{filename}.json"
+    
+    with open(filepath, 'w') as outfile:
+        json.dump(data, outfile, indent=2, separators=(',', ': '))
+
+    log.info("JSON data saved to file: %s", filename)
+
 if __name__ == '__main__':
+    # Configure our logger
+    log = logging.getLogger(__name__)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(
+        logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+    )
+    log.addHandler(handler)
+    log.setLevel(logging.INFO)
+    log.propagate = False
+
     main()
